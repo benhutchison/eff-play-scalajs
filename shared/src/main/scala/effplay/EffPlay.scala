@@ -23,7 +23,7 @@ object EffPlay extends App {
   //Surprising because I'd thought the above type aliases were substitutable for these expressions
   //type E =  State[Int, ?] |: Reader[AppConfig, ?] |: Writer[String, ?] |: NoEffect
 
-  println(App.startApp[E].runReader(AppConfig(7)).runWriter.runState(42).run)
+  println(App.startApp[E].runReader(AppConfig(7)).runWriter.runState(scala.util.Random.nextInt).run)
 }
 
 case class AppConfig(threadCount: Int)
@@ -40,8 +40,9 @@ object App {
 
   def startApp[E: Env: Log: RNG]: Eff[E, Unit] = for {
     c <- ask
-    _ <- tell(s"starting ${c.threadCount} threads..")
-    _ <- rollDice
+    tc <- EffMonad[E].pure(c.threadCount * 2)
+    _ <- tell(s"starting ${tc} threads..")
+    _ <- optional
   } yield ()
 
   def rollDice[E: RNG: Log]: Eff[E, Int] = for {
@@ -50,5 +51,13 @@ object App {
     roll = new util.Random(seed).nextInt(6) + 1
     _ <- tell(s"rolled a dice: ${roll}")
   } yield roll
+
+  /** Roll a dice, log and and return the value if its greater than 3 */
+  def optional[E: RNG: Log]: Eff[E, Option[Int]] = for {
+    roll <- rollDice
+    optR <- if (roll > 3) for {
+      _ <- tell(s"found a suitable roll ${roll}")
+    } yield (Some(roll)) else EffMonad[E].pure(None)
+  } yield (optR)
 
 }
