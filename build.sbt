@@ -12,7 +12,7 @@ lazy val ep = crossProject.in(file(".")).
     name := "eff-cats-play",
     version := "0.1-SNAPSHOT",
     scalaVersion := "2.11.8",
-    libraryDependencies += "org.atnos" %%% "eff-cats" % "1.5.1-20160508090222-541f0a6",
+    libraryDependencies += "org.atnos" %%% "eff-cats" % "1.6",
 	  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.7.1"),
     addCompilerPlugin("com.milessabin" % "si2712fix-plugin" % "1.1.0" cross CrossVersion.full)
   ).

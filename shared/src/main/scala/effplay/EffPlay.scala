@@ -40,11 +40,9 @@ object App {
   type Log[E] = Member[Writer[String, ?], E]
   type RNG[E] = Member[State[Int, ?], E]
 
-   def plift[A, E <: Effects](a: A): Eff[E, A] = EffMonad[E].pure(a)
-
   def startApp[E: Env: Log: RNG]: Eff[E, Unit] = for {
     c <- ask
-    tc <- plift(c.threadCount * 2)
+    tc <- EffMonad[E].pure(c.threadCount * 2)
     _ <- tell(s"starting ${tc} threads..")
     _ <- optional
   } yield ()
@@ -61,7 +59,7 @@ object App {
     roll <- rollDice
     optR <- if (roll > 3) for {
       _ <- tell(s"found a suitable roll ${roll}")
-    } yield (Some(roll)) else plift(None)
+    } yield (Some(roll)) else EffMonad[E].pure(None)
   } yield (optR)
 
 }
