@@ -20,7 +20,9 @@ object EffPlay extends App {
   type E = SInt |: RConfig |: WString |: NoEffect
 
   //Wont compile (with KindProjector)
-  //Surprising because I'd thought the above type aliases were substitutable for these expressions
+  //Surprising because I'd thought the above type aliases were substitutable for thes
+  //
+  // e expressions
   //type E =  State[Int, ?] |: Reader[AppConfig, ?] |: Writer[String, ?] |: NoEffect
 
   println(App.startApp[E].runReader(AppConfig(7)).runWriter.runState(scala.util.Random.nextInt).run)
@@ -38,9 +40,11 @@ object App {
   type Log[E] = Member[Writer[String, ?], E]
   type RNG[E] = Member[State[Int, ?], E]
 
+   def plift[A, E <: Effects](a: A): Eff[E, A] = EffMonad[E].pure(a)
+
   def startApp[E: Env: Log: RNG]: Eff[E, Unit] = for {
     c <- ask
-    tc <- EffMonad[E].pure(c.threadCount * 2)
+    tc <- plift(c.threadCount * 2)
     _ <- tell(s"starting ${tc} threads..")
     _ <- optional
   } yield ()
@@ -57,7 +61,7 @@ object App {
     roll <- rollDice
     optR <- if (roll > 3) for {
       _ <- tell(s"found a suitable roll ${roll}")
-    } yield (Some(roll)) else EffMonad[E].pure(None)
+    } yield (Some(roll)) else plift(None)
   } yield (optR)
 
 }
